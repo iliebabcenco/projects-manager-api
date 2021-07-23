@@ -1,5 +1,8 @@
 require 'rails_helper'
 
 RSpec.describe Comment, type: :model do
-  pending "add some examples to (or delete) #{__FILE__}"
+  let(:name) { "test name" }
+  it { should belong_to(:project) }
+  it { should validate_presence_of(:content) }
+  it { should validate_presence_of(:likes) }
 end
