@@ -2,13 +2,15 @@ require 'rails_helper'
 
 RSpec.describe 'Comments API' do
   let(:name) { "test name" }
+  let(:user) { create(:user) }
   let!(:project) { create(:project) }
   let!(:comments) { create_list(:comment, 20, project_id: project.id) }
   let(:project_id) { project.id }
   let(:id) { comments.first.id }
+  let(:headers) { valid_headers }
 
   describe 'GET /projects/:project_id/comments' do
-    before { get "/projects/#{project_id}/comments" }
+    before { get "/projects/#{project_id}/comments", params: {}, headers: headers }
 
     context 'when project exists' do
       it 'returns status code 200' do
@@ -34,7 +36,7 @@ RSpec.describe 'Comments API' do
   end
 
   describe 'GET /projects/:project_id/comments/:id' do
-    before { get "/projects/#{project_id}/comments/#{id}" }
+    before { get "/projects/#{project_id}/comments/#{id}", params: {}, headers: headers }
 
     context 'when project comment exists' do
       it 'returns status code 200' do
@@ -60,10 +62,10 @@ RSpec.describe 'Comments API' do
   end
 
   describe 'POST /projects/:project_id/comments' do
-    let(:valid_attributes) { { content: 'Visit Narnia', likes: 15 } }
+    let(:valid_attributes) { { content: 'Visit Narnia', likes: 15 }.to_json }
 
     context 'when request attributes are valid' do
-      before { post "/projects/#{project_id}/comments", params: valid_attributes }
+      before { post "/projects/#{project_id}/comments", params: valid_attributes, headers: headers }
 
       it 'returns status code 201' do
         expect(response).to have_http_status(201)
@@ -71,7 +73,7 @@ RSpec.describe 'Comments API' do
     end
 
     context 'when an invalid request' do
-      before { post "/projects/#{project_id}/comments", params: {} }
+      before { post "/projects/#{project_id}/comments", params: {}, headers: headers }
 
       it 'returns status code 422' do
         expect(response).to have_http_status(422)
@@ -84,9 +86,9 @@ RSpec.describe 'Comments API' do
   end
 
   describe 'PUT /projects/:project_id/comments/:id' do
-    let(:valid_attributes) { { content: 'Visit Narnia' } }
+    let(:valid_attributes) { { content: 'Visit Narnia' }.to_json }
 
-    before { put "/projects/#{project_id}/comments/#{id}", params: valid_attributes }
+    before { put "/projects/#{project_id}/comments/#{id}", params: valid_attributes, headers: headers }
 
     context 'when comment exists' do
       it 'returns status code 204' do
@@ -113,7 +115,7 @@ RSpec.describe 'Comments API' do
   end
 
   describe 'DELETE /projects/:id' do
-    before { delete "/projects/#{project_id}/comments/#{id}" }
+    before { delete "/projects/#{project_id}/comments/#{id}", params: {}, headers: headers }
 
     it 'returns status code 204' do
       expect(response).to have_http_status(204)

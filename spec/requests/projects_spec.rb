@@ -1,13 +1,16 @@
 require 'rails_helper'
 include RequestSpecHelper
+include ControllerSpecHelper
 
 RSpec.describe 'Project API', type: :request do
-    let(:name) { "test name" }
-  let!(:projects) { create_list(:project, 10) }
+  let(:name) { "test name" }
+  let(:user) { create(:user) }
+  let!(:projects) { create_list(:project, 10, created_by: user.id) }
   let(:project_id) { projects.first.id }
+  let(:headers) { valid_headers }
 
   describe 'GET /projects' do
-    before { get '/projects' }
+    before { get '/projects', params: {}, headers: headers }
 
     it 'returns projects' do
       expect(json).not_to be_empty
@@ -20,7 +23,7 @@ RSpec.describe 'Project API', type: :request do
   end
 
   describe 'GET /projects/:id' do
-    before { get "/projects/#{project_id}" }
+    before { get "/projects/#{project_id}", params: {}, headers: headers }
 
     context 'when the record exists' do
       it 'returns the project' do
@@ -48,16 +51,16 @@ RSpec.describe 'Project API', type: :request do
 
   describe 'POST /projects' do
     let(:valid_attributes) do
-      { title: 'Learn Elm', description: 'Igogo', images: ['img1.png', 'img2.png'], created_by: '1', likes: 5.to_s }.to_json
+      { title: 'Learn Elm', description: 'Igogo', created_by: user.id.to_s, likes: 5.to_s }.to_json
     end 
 
     context 'when the request is valid' do
-      before { post '/projects', params: { title: 'Learn Elm', description: 'Igogo', images: 'img1.png', likes: 5, created_by: '1' } }
+      before { post '/projects', params: valid_attributes, headers: headers }
 
       it 'creates a project' do
         expect(json['title']).to eq('Learn Elm')
         expect(json['description']).to eq('Igogo')
-        expect(json['created_by']).to eq('1')
+        expect(json['created_by']).to eq(user.id.to_s)
         expect(json['likes']).to eq(5)
       end
 
@@ -67,7 +70,7 @@ RSpec.describe 'Project API', type: :request do
     end
 
     context 'when the request is invalid' do
-      before { post '/projects', params: { title: 'Foobar' } }
+      before { post '/projects', params: { },  headers: headers }
 
       it 'returns status code 422' do
         expect(response).to have_http_status(422)
@@ -75,16 +78,16 @@ RSpec.describe 'Project API', type: :request do
 
       it 'returns a validation failure message' do
         expect(response.body)
-          .to match("Validation failed: Description can't be blank, Created by can't be blank, Likes can't be blank")
+          .to match("Validation failed: Title can't be blank, Description can't be blank, Likes can't be blank")
       end
     end
   end
 
   describe 'PUT /projects/:id' do
-    let(:valid_attributes) { { title: 'Shopping' } }
+    let(:valid_attributes) { { title: 'Shopping' }.to_json }
 
     context 'when the record exists' do
-      before { put "/projects/#{project_id}", params: valid_attributes }
+      before { put "/projects/#{project_id}", params: valid_attributes, headers: headers }
 
       it 'updates the record' do
         expect(response.body).to be_empty
@@ -97,7 +100,7 @@ RSpec.describe 'Project API', type: :request do
   end
 
   describe 'DELETE /projects/:id' do
-    before { delete "/projects/#{project_id}" }
+    before { delete "/projects/#{project_id}", params: {}, headers: headers }
 
     it 'returns status code 204' do
       expect(response).to have_http_status(204)
