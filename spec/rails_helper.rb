@@ -8,11 +8,9 @@ abort("The Rails environment is running in production mode!") if Rails.env.produ
 require 'rspec/rails'
 
 Dir[Rails.root.join('spec/support/**/*.rb')].each { |f| require f }
-# [...]
 RSpec.configuration do |config|
-  # [...]
-  config.include RequestSpecHelper, type: :request
-  # [...]
+  config.include RequestSpecHelper
+  config.include ControllerSpecHelper
 end
 
 Shoulda::Matchers.configure do |config|

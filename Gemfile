@@ -8,6 +8,7 @@ gem 'pg', '~> 1.1'
 gem 'puma', '~> 5.0'
 gem 'jwt'
 gem 'rubocop', '>= 1.0', '< 2.0'
+gem 'rubocop-rspec'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 # gem 'jbuilder', '~> 2.7'
 gem 'bcrypt', '~> 3.1.7'
